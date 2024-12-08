@@ -1,16 +1,11 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
 import { FcSalesPerformance } from "react-icons/fc";
 
 const Sales = () => {
-  const [sales, setSales] = useState(() => {
-    const storedSales = Object.keys(localStorage)
-      .filter(key => key.startsWith('sale_'))
-      .map(key => JSON.parse(localStorage.getItem(key)));
-    return storedSales;
-  });
-  
+  const [sales, setSales] = useState([]);
   const [ref, setRef] = useState("");
   const [cus, setCus] = useState("");
   const [sel, setSel] = useState([]);
@@ -20,10 +15,18 @@ const Sales = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    setProducts(storedProducts);
-    setUsers(storedUsers);
+    // Check if localStorage is available in the browser (client-side)
+    if (typeof window !== "undefined") {
+      const storedSales = Object.keys(localStorage)
+        .filter((key) => key.startsWith('sale_'))
+        .map((key) => JSON.parse(localStorage.getItem(key)));
+      setSales(storedSales);
+
+      const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
+      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+      setProducts(storedProducts);
+      setUsers(storedUsers);
+    }
   }, []);
 
   useEffect(() => {
@@ -41,7 +44,9 @@ const Sales = () => {
   };
 
   const Delete = (reference) => {
-    localStorage.removeItem(`sale_${reference}`);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(`sale_${reference}`);
+    }
     setSales((prevSales) => prevSales.filter((sale) => sale.reference !== reference));
   };
 
@@ -54,7 +59,9 @@ const Sales = () => {
       quantity,
       total,
     };
-    localStorage.setItem(`sale_${ref}`, JSON.stringify(newSale));
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`sale_${ref}`, JSON.stringify(newSale));
+    }
     setSales((prevSales) => [...prevSales, newSale]);
     Reset();
   };
